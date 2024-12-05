@@ -18,28 +18,6 @@ fn set_ordered(print_set: &[usize], rules: &[(usize, usize)]) -> bool {
     rules.iter().all(|rule| test_rule(print_set, rule))
 }
 
-fn reorder(print_set: &[usize], broken_rule: &(usize, usize)) -> Vec<usize> {
-    let Some(a) = print_set.iter().position(|item| &broken_rule.0 == item) else {
-        return Vec::from(print_set);
-    };
-
-    let Some(b) = print_set.iter().position(|item| &broken_rule.1 == item) else {
-        return Vec::from(print_set);
-    };
-
-    if a < b {
-        return Vec::from(print_set);
-    }
-
-    let mut v = Vec::from(&print_set[0..b]);
-    v.push(print_set[a]);
-    v.push(print_set[b]);
-    v.extend(&print_set[b + 1..a]);
-    v.extend(&print_set[a + 1..print_set.len()]);
-
-    v
-}
-
 fn reorder_all(print_set: &[usize], rules: &[(usize, usize)]) -> Vec<usize> {
     let sort_fn = |a: &usize, b: &usize| -> Ordering {
         for rule in rules {
@@ -97,29 +75,4 @@ fn main() {
         .sum();
 
     dbg!(part1, part2);
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{reorder, test_rule};
-
-    #[test]
-    fn test_reorder_single_rule() {
-        let print_set = [1, 2, 3, 4, 5];
-        let rule = (4, 2);
-        let reordered = reorder(&print_set, &rule);
-        assert_eq!(reordered, [1, 4, 2, 3, 5]);
-        assert!(test_rule(&reordered, &rule));
-    }
-
-    #[test]
-    fn test_reorder_multiple_rule() {
-        let print_set = [1, 2, 3, 4, 5];
-        let rule1 = (4, 2);
-        let rule2 = (5, 1);
-        let reordered = reorder(&reorder(&print_set, &rule1), &rule2);
-
-        assert_eq!(reordered, [5, 1, 4, 2, 3]);
-        assert!(test_rule(&reordered, &rule1) && test_rule(&reordered, &rule2));
-    }
 }
