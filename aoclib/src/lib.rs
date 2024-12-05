@@ -30,6 +30,12 @@ impl AocData {
         Ok(self.lines()?.map(|line| line.split_whitespace()))
     }
 
+    pub fn row_chars(
+        &self,
+    ) -> Result<impl Iterator<Item = impl Iterator<Item = char> + '_>, AocError> {
+        Ok(self.lines()?.map(|line| line.chars()))
+    }
+
     pub fn parsed_rows<T>(&self) -> Result<Vec<Vec<T>>, AocError>
     where
         T: FromStr,
