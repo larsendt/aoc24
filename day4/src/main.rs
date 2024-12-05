@@ -1,4 +1,5 @@
 use aoclib::AocData;
+use std::ops::Range;
 
 fn build_grid(a: &AocData) -> Vec<Vec<char>> {
     a.row_chars()
@@ -7,74 +8,99 @@ fn build_grid(a: &AocData) -> Vec<Vec<char>> {
         .collect()
 }
 
-fn search_suffix(grid: &Vec<Vec<char>>, x: usize, y: usize, suffix: &str) -> usize {
-    let mut schars = suffix.chars();
-    let Some(expected) = schars.next() else {
-        panic!("no current char");
-    };
+fn get_cell(
+    grid: &[Vec<char>],
+    x: usize,
+    y: usize,
+    dx: isize,
+    dy: isize,
+    mul: isize,
+) -> Option<char> {
+    let dx = mul * dx;
+    let dy = mul * dy;
+    let xx = x as isize + dx;
+    let yy = y as isize + dy;
 
-    if grid[y][x] != expected {
-        panic!(
-            "expected {} but got {} at {} {}",
-            expected, grid[y][x], x, y
-        );
+    if xx >= grid[0].len() as isize || xx < 0 {
+        return None;
     }
 
-    let Some(search) = schars.next() else {
-        // We verified that the remaining character is in the expected place on the grid. No search
-        // character means we matched the full suffix.
-        return 1;
-    };
+    if yy >= grid.len() as isize || yy < 0 {
+        return None;
+    }
 
-    let xrange = || {
-        if x == 0 {
-            // TODO: don't check 0
-            [0, 1]
-        } else if x == grid[0].len() - 1 {
-            [-1, 0]
-        } else {
-            [-1, 1]
+    Some(grid[yy as usize][xx as usize])
+}
+
+fn search_xmas(grid: &[Vec<char>], x: usize, y: usize) -> usize {
+    let deltas = [
+        (-1, -1),
+        (-1, 0),
+        (-1, 1),
+        (0, -1),
+        (0, 1),
+        (1, -1),
+        (1, 0),
+        (1, 1),
+    ];
+
+    let mut total = 0;
+
+    for (dx, dy) in deltas {
+        let searches = [
+            get_cell(grid, x, y, dx, dy, 0),
+            get_cell(grid, x, y, dx, dy, 1),
+            get_cell(grid, x, y, dx, dy, 2),
+            get_cell(grid, x, y, dx, dy, 3),
+        ];
+
+        if searches == [Some('X'), Some('M'), Some('A'), Some('S')] {
+            total += 1;
         }
-    };
+    }
 
-    let yrange = if y == 0 {
-        [0, 1]
-    } else if y == grid.len() - 1 {
-        [-1, 0]
+    total
+}
+
+fn search_x_mas(grid: &[Vec<char>], x: usize, y: usize) -> usize {
+    let d1 = [
+        get_cell(grid, x, y, 1, 1, -1),
+        get_cell(grid, x, y, 1, 1, 0),
+        get_cell(grid, x, y, 1, 1, 1),
+    ];
+
+    let d2 = [
+        get_cell(grid, x, y, -1, 1, -1),
+        get_cell(grid, x, y, -1, 1, 0),
+        get_cell(grid, x, y, -1, 1, 1),
+    ];
+
+    let d1: String = d1.iter().filter_map(|f| *f).collect();
+    let d2: String = d2.iter().filter_map(|f| *f).collect();
+
+    if (d1 == "MAS" || d1 == "SAM") && (d2 == "MAS" || d2 == "SAM") {
+        1
     } else {
-        [-1, 1]
-    };
-
-    let mut n_found = 0;
-
-    for yy in yrange {
-        let ny = (y as isize + yy) as usize;
-        for xx in xrange() {
-            let nx = (x as isize + xx) as usize;
-
-            if grid[ny][nx] == search {
-                n_found += search_suffix(grid, nx, ny, &suffix[1..]);
-            }
-        }
+        0
     }
-
-    n_found
 }
 
 fn main() {
-    let a = AocData::new("input2.txt").expect("input file");
+    let a = AocData::new("input.txt").expect("input file");
     let grid = build_grid(&a);
 
     let mut part1 = 0;
+    let mut part2 = 0;
+
     for (y, row) in grid.iter().enumerate() {
         for (x, col) in row.iter().enumerate() {
             if col == &'X' {
-                let n = search_suffix(&grid, x, y, "XMAS");
-                part1 += n;
-                println!("at {},{} found {} XMAS (total {})", x, y, n, part1);
+                part1 += search_xmas(&grid, x, y);
+            } else if col == &'A' {
+                part2 += search_x_mas(&grid, x, y);
             }
         }
     }
 
-    dbg!(part1);
+    dbg!(part1, part2);
 }
