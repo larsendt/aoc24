@@ -318,6 +318,7 @@ fn main() {
 
     // Really wanted this one to work but I think something is wrong with the loops that contain >1 rectangle
     let part2 = get_intersections(&mut g2, &path);
+    // This one works though
     let other_part2 = simulate_obstacle_placement(&mut g3, &path, initial_pos, initial_dir);
 
     print_grid(&g2);
