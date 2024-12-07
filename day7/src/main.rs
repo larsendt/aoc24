@@ -22,21 +22,10 @@ enum Op {
     Concat,
 }
 
-fn gen_ops(n: usize, allowed_ops: &[Op]) -> Vec<Vec<Op>> {
-    (1..=n)
+fn gen_ops(n: usize, allowed_ops: &[Op]) -> impl Iterator<Item = Vec<Op>> {
+    (0..n)
         .map(|_| Vec::from(allowed_ops))
         .multi_cartesian_product()
-        .collect()
-    // allowed_ops
-    //     .iter()
-    //     .copied()
-    //     .combinations_with_replacement(n)
-    //     .collect()
-    // std::iter::repeat(allowed_ops)
-    //     .take(n)
-    //     .multi_cartesian_product()
-    //     .map(|ops| ops.iter().map(|op| **op).collect())
-    //     .collect()
 }
 
 fn apply_equation(eq: &Equation, mut ops: Vec<Op>) -> usize {
