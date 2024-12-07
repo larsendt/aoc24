@@ -48,8 +48,7 @@ fn apply_equation(eq: &Equation, mut ops: Vec<Op>) -> usize {
             Op::Add => val += c,
             Op::Mul => val *= c,
             Op::Concat => {
-                let r_digits = (*c as f64).log10() as u32 + 1;
-                let nval = (val * (10usize.pow(r_digits))) + c;
+                let nval = (val * (10usize.pow((*c as f64).log10() as u32 + 1))) + c;
                 val = nval;
             }
         }
@@ -92,6 +91,4 @@ fn main() {
         .sum();
 
     dbg!(part1, part2);
-
-    dbg!(gen_ops(2, &part2_ops));
 }
